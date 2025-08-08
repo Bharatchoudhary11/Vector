@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Request, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from integrations.airtable import authorize_airtable, get_items_airtable, oauth2callback_airtable, get_airtable_credentials
@@ -40,7 +41,10 @@ async def get_airtable_credentials_integration(user_id: str = Form(...), org_id:
 
 @app.post('/integrations/airtable/load')
 async def get_airtable_items(credentials: str = Form(...)):
-    return await get_items_airtable(credentials)
+    try:
+        return await get_items_airtable(credentials)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # Notion
@@ -76,3 +80,11 @@ async def get_hubspot_credentials_integration(user_id: str = Form(...), org_id: 
 @app.post('/integrations/hubspot/get_hubspot_items')
 async def load_slack_data_integration(credentials: str = Form(...)):
     return await get_items_hubspot(credentials)
+
+@app.get("/.well-known/appspecific/com.chrome.devtools.json")
+async def handle_chrome_devtools():
+    return JSONResponse(content={})
+
+@app.get("/chrome.devtools.json")
+async def handle_chrome_devtools_root():
+    return JSONResponse(content={})
