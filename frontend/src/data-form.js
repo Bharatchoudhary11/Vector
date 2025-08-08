@@ -4,7 +4,7 @@ import {
     TextField,
     Button,
 } from '@mui/material';
-import axios from 'axios';
+import { api } from './api';
 
 const endpointMapping = {
     'Notion': 'notion',
@@ -19,7 +19,7 @@ export const DataForm = ({ integrationType, credentials }) => {
         try {
             const formData = new FormData();
             formData.append('credentials', JSON.stringify(credentials));
-            const response = await axios.post(`http://localhost:8000/integrations/${endpoint}/load`, formData);
+            const response = await api.post(`/integrations/${endpoint}/load`, formData);
             const data = response.data;
             setLoadedData(data);
         } catch (e) {
