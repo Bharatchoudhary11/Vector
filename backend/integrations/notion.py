@@ -18,7 +18,12 @@ CLIENT_SECRET = 'XXX'
 encoded_client_id_secret = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
 
 REDIRECT_URI = 'http://localhost:8000/integrations/notion/oauth2callback'
-authorization_url = f'https://api.notion.com/v1/oauth/authorize?client_id={CLIENT_ID}&response_type=code&owner=user&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fintegrations%2Fnotion%2Foauth2callback'
+# Build the authorization URL with an encoded redirect URI. Using `quote`
+# avoids hardcoding a percent-encoded value and prevents malformed URLs.
+authorization_url = (
+    f"https://api.notion.com/v1/oauth/authorize?client_id={CLIENT_ID}"
+    f"&response_type=code&owner=user&redirect_uri={quote(REDIRECT_URI)}"
+)
 
 async def authorize_notion(user_id, org_id):
     state_data = {
