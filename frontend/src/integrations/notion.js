@@ -20,18 +20,14 @@ export const NotionIntegration = ({ user, org, integrationParams, setIntegration
             formData.append('user_id', user);
             formData.append('org_id', org);
             const response = await api.post(`/integrations/notion/authorize`, formData);
-            console.log(response);
             const authURL = response?.data;
 
-            const newWindow = window.open(authURL, 'Notion Authorization', 'width=600, height=600');
-
-            // Polling for the window to close
-            const pollTimer = window.setInterval(() => {
-                if (newWindow?.closed !== false) { 
-                    window.clearInterval(pollTimer);
-                    handleWindowClosed();
-                }
-            }, 200);
+            const onFocus = () => {
+                window.removeEventListener('focus', onFocus);
+                setTimeout(() => handleWindowClosed(), 500);
+            };
+            window.addEventListener('focus', onFocus);
+            window.open(authURL, 'Notion Authorization', 'width=600,height=600');
         } catch (e) {
             setIsConnecting(false);
             alert(e?.response?.data?.detail);
