@@ -22,15 +22,12 @@ export const AirtableIntegration = ({ user, org, integrationParams, setIntegrati
             const response = await api.post(`/integrations/airtable/authorize`, formData);
             const authURL = response?.data;
 
-            const newWindow = window.open(authURL, 'Airtable Authorization', 'width=600, height=600');
-
-            // Polling for the window to close
-            const pollTimer = window.setInterval(() => {
-                if (newWindow?.closed !== false) { 
-                    window.clearInterval(pollTimer);
-                    handleWindowClosed();
-                }
-            }, 200);
+            const onFocus = () => {
+                window.removeEventListener('focus', onFocus);
+                setTimeout(() => handleWindowClosed(), 500);
+            };
+            window.addEventListener('focus', onFocus);
+            window.open(authURL, 'Airtable Authorization', 'width=600,height=600');
         } catch (e) {
             setIsConnecting(false);
             alert(e?.response?.data?.detail);
