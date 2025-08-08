@@ -6,7 +6,7 @@ import {
     Button,
     CircularProgress
 } from '@mui/material';
-import axios from 'axios';
+import { api } from '../api';
 
 export const NotionIntegration = ({ user, org, integrationParams, setIntegrationParams }) => {
     const [isConnected, setIsConnected] = useState(false);
@@ -19,7 +19,7 @@ export const NotionIntegration = ({ user, org, integrationParams, setIntegration
             const formData = new FormData();
             formData.append('user_id', user);
             formData.append('org_id', org);
-            const response = await axios.post(`http://localhost:8000/integrations/notion/authorize`, formData);
+            const response = await api.post(`/integrations/notion/authorize`, formData);
             console.log(response);
             const authURL = response?.data;
 
@@ -44,7 +44,7 @@ export const NotionIntegration = ({ user, org, integrationParams, setIntegration
             const formData = new FormData();
             formData.append('user_id', user);
             formData.append('org_id', org);
-            const response = await axios.post(`http://localhost:8000/integrations/notion/credentials`, formData);
+            const response = await api.post(`/integrations/notion/credentials`, formData);
             const credentials = response.data; 
             if (credentials) {
                 setIsConnecting(false);
