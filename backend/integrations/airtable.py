@@ -13,16 +13,23 @@ import os
 from urllib.parse import quote
 
 import requests
+from dotenv import load_dotenv
 from integrations.integration_item import IntegrationItem
 
 from redis_client import add_key_value_redis, get_value_redis, delete_key_redis
+
+# Load environment variables from a .env file if present
+load_dotenv()
 
 CLIENT_ID = os.getenv('AIRTABLE_CLIENT_ID')
 CLIENT_SECRET = os.getenv('AIRTABLE_CLIENT_SECRET')
 if not CLIENT_ID or not CLIENT_SECRET:
     raise ValueError('Missing Airtable client ID or secret.')
 
-REDIRECT_URI = 'http://localhost:8000/integrations/airtable/oauth2callback'
+REDIRECT_URI = os.getenv(
+    'AIRTABLE_REDIRECT_URI',
+    'http://localhost:8000/integrations/airtable/oauth2callback',
+)
 authorization_url = (
     f'https://airtable.com/oauth2/v1/authorize?client_id={CLIENT_ID}'
     f'&response_type=code&owner=user&redirect_uri={quote(REDIRECT_URI)}'
