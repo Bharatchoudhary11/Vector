@@ -8,6 +8,7 @@ import httpx
 import asyncio
 import base64
 import requests
+from urllib.parse import quote, unquote
 from integrations.integration_item import IntegrationItem
 
 from redis_client import add_key_value_redis, get_value_redis, delete_key_redis
@@ -26,16 +27,19 @@ async def authorize_notion(user_id, org_id):
         'org_id': org_id
     }
     encoded_state = json.dumps(state_data)
-    await add_key_value_redis(f'notion_state:{org_id}:{user_id}', encoded_state, expire=600)
+    await add_key_value_redis(
+        f'notion_state:{org_id}:{user_id}', encoded_state, expire=600
+    )
 
-    return f'{authorization_url}&state={encoded_state}'
+    state_param = quote(encoded_state)
+    return f"{authorization_url}&state={state_param}"
 
 async def oauth2callback_notion(request: Request):
     if request.query_params.get('error'):
         raise HTTPException(status_code=400, detail=request.query_params.get('error'))
     code = request.query_params.get('code')
     encoded_state = request.query_params.get('state')
-    state_data = json.loads(encoded_state)
+    state_data = json.loads(unquote(encoded_state))
 
     original_state = state_data.get('state')
     user_id = state_data.get('user_id')
