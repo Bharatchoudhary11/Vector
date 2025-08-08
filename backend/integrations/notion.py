@@ -10,9 +10,13 @@ import base64
 import requests
 from urllib.parse import quote, unquote
 import os
+from dotenv import load_dotenv
 from integrations.integration_item import IntegrationItem
 
 from redis_client import add_key_value_redis, get_value_redis, delete_key_redis
+
+# Load environment variables from a .env file if present
+load_dotenv()
 
 CLIENT_ID = os.getenv('NOTION_CLIENT_ID')
 CLIENT_SECRET = os.getenv('NOTION_CLIENT_SECRET')
@@ -20,7 +24,10 @@ if not CLIENT_ID or not CLIENT_SECRET:
     raise ValueError('Missing Notion client ID or secret.')
 encoded_client_id_secret = base64.b64encode(f'{CLIENT_ID}:{CLIENT_SECRET}'.encode()).decode()
 
-REDIRECT_URI = 'http://localhost:8000/integrations/notion/oauth2callback'
+REDIRECT_URI = os.getenv(
+    'NOTION_REDIRECT_URI',
+    'http://localhost:8000/integrations/notion/oauth2callback',
+)
 # Build the authorization URL with an encoded redirect URI. Using `quote`
 # avoids hardcoding a percent-encoded value and prevents malformed URLs.
 authorization_url = (
