@@ -107,7 +107,7 @@ def create_integration_item_metadata_object(
     response_json: str,
 ) -> IntegrationItem:
     """creates an integration metadata object from the response"""
-    name = _recursive_dict_search(response_json['properties'], 'content')
+    name = _recursive_dict_search(response_json.get('properties', {}), 'content')
     parent_type = (
         ''
         if response_json['parent']['type'] is None
@@ -155,4 +155,5 @@ async def get_items_notion(credentials) -> list[IntegrationItem]:
             )
 
         print(list_of_integration_item_metadata)
-    return
+        return list_of_integration_item_metadata
+    return []
