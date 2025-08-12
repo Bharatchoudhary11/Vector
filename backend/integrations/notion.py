@@ -61,6 +61,11 @@ async def oauth2callback_notion(request: Request):
     org_id = state_data.get('org_id')
 
     saved_state = await get_value_redis(f'notion_state:{org_id}:{user_id}')
+    # Values returned from Redis are bytes when using a real Redis server but
+    # plain strings when falling back to the in-memory store. Normalize to a
+    # string so json operations behave consistently.
+    if isinstance(saved_state, bytes):
+        saved_state = saved_state.decode("utf-8")
 
     if not saved_state or original_state != json.loads(saved_state).get('state'):
         raise HTTPException(status_code=400, detail='State does not match.')
@@ -97,9 +102,13 @@ async def get_notion_credentials(user_id, org_id):
     credentials = await get_value_redis(f'notion_credentials:{org_id}:{user_id}')
     if not credentials:
         raise HTTPException(status_code=400, detail='No credentials found.')
+
+    # Like with `saved_state` above, normalize any bytes returned from Redis
+    # before parsing the JSON string.
+    if isinstance(credentials, bytes):
+        credentials = credentials.decode("utf-8")
     credentials = json.loads(credentials)
-    if not credentials:
-        raise HTTPException(status_code=400, detail='No credentials found.')
+
     await delete_key_redis(f'notion_credentials:{org_id}:{user_id}')
 
     return credentials
